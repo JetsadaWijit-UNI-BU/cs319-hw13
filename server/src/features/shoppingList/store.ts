@@ -1,0 +1,32 @@
+import { prisma } from "../../lib/prisma.js";
+
+// Shopping list data access: Prisma effects only.
+export const shoppingListStore = {
+  findManyByUser: (userId: string) =>
+    prisma.shoppingListItem.findMany({
+      where: { userId },
+      include: { meal: { include: { ingredients: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+
+  findUserAndMeal: (userId: string, mealId: string) =>
+    Promise.all([
+      prisma.user.findUnique({ where: { id: userId } }),
+      prisma.meal.findUnique({ where: { id: mealId } }),
+    ]),
+
+  findUnique: (id: string) =>
+    prisma.shoppingListItem.findUnique({ where: { id } }),
+
+  create: (userId: string, mealId: string) =>
+    prisma.shoppingListItem.create({
+      data: { userId, mealId },
+      include: { meal: { include: { ingredients: true } } },
+    }),
+
+  update: (id: string, checked: boolean) =>
+    prisma.shoppingListItem.update({ where: { id }, data: { checked } }),
+
+  delete: (id: string) =>
+    prisma.shoppingListItem.delete({ where: { id } }),
+};

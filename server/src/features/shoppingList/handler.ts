@@ -1,0 +1,69 @@
+import { type Request, type Response } from "express";
+import { z } from "zod";
+import { shoppingListService } from "./service.js";
+import { toMealResponse } from "../meals/transform.js";
+import { idSchema } from "../../lib/schemas.js";
+
+// Shopping list HTTP handlers: request → service → response.
+export const shoppingListHandlers = {
+  getItems: async (req: Request, res: Response, port: number) => {
+    const userId = String(req.params.userId);
+    const items = await shoppingListService.getItems(userId);
+    res.json({
+      success: true,
+      count: items.length,
+      data: {
+        meals: items.map((i) => ({
+          ...toMealResponse(port, i.meal as any),
+          itemId: i.id,
+          checked: i.checked,
+        })),
+      },
+    });
+  },
+
+  addItem: async (req: Request, res: Response, port: number) => {
+    const userId = String(req.params.userId);
+    const parsed = idSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ success: false, message: parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง" });
+      return;
+    }
+    const { mealId } = parsed.data;
+    const item = await shoppingListService.addItem(userId, mealId);
+    if (!item) {
+      res.status(404).json({ success: false, message: "ไม่พบผู้ใช้หรือเมนูอาหาร" });
+      return;
+    }
+    res.status(201).json({
+      success: true,
+      message: "เพิ่มในรายการซื้อของเรียบร้อย",
+      data: { ...toMealResponse(port, item.meal as any), itemId: item.id, checked: item.checked },
+    });
+  },
+
+  toggleItem: async (req: Request, res: Response) => {
+    const itemId = String(req.params.itemId);
+    const { checked } = z.object({ checked: z.boolean() }).parse(req.body);
+    const item = await shoppingListService.toggleItem(itemId, checked);
+    if (!item) {
+      res.status(404).json({ success: false, message: "ไม่พบรายการนี้" });
+      return;
+    }
+    res.json({
+      success: true,
+      message: "อัปเดตรายการซื้อของเรียบร้อย",
+      data: { itemId: item.id, checked: item.checked },
+    });
+  },
+
+  removeItem: async (req: Request, res: Response) => {
+    const itemId = String(req.params.itemId);
+    const removed = await shoppingListService.removeItem(itemId);
+    if (!removed) {
+      res.status(404).json({ success: false, message: "ไม่พบรายการนี้" });
+      return;
+    }
+    res.json({ success: true, message: "ลบรายการซื้อของเรียบร้อย" });
+  },
+};
