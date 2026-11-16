@@ -7,7 +7,7 @@ export const MealDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: meal, isLoading, isError, error, refetch } = useMealDetail(id);
-  const { favorites, toggleFavorite, setShoppingListMealId } = useMealStore();
+  const { user, favorites, addFavorite, removeFavorite, addShoppingItem } = useMealStore();
 
   if (isLoading) {
     return (
@@ -43,7 +43,7 @@ export const MealDetailPage: React.FC = () => {
     );
   }
 
-  const isSaved = favorites.includes(meal.idMeal);
+  const isSaved = favorites.some((f) => f.idMeal === meal.idMeal);
 
   const ingredients: { name: string; measure: string }[] = [];
   for (let i = 1; i <= 20; i++) {
@@ -56,6 +56,15 @@ export const MealDetailPage: React.FC = () => {
       });
     }
   }
+
+  const handleAddShopping = async () => {
+    if (!user) {
+      alert('กรุณาเข้าสู่ระบบก่อนเพิ่มในรายการซื้อของ');
+      return;
+    }
+    await addShoppingItem(user.id, meal);
+    navigate("/shopping-list");
+  };
 
   const youtubeEmbedUrl = meal.strYoutube?.replace("watch?v=", "embed/");
 
@@ -88,7 +97,17 @@ export const MealDetailPage: React.FC = () => {
             </div>
           </div>
           <button
-            onClick={() => toggleFavorite(meal.idMeal)}
+            onClick={() => {
+              if (!user) {
+                alert('กรุณาเข้าสู่ระบบก่อนเพิ่มรายการโปรด');
+                return;
+              }
+              if (isSaved) {
+                removeFavorite(user.id, meal.idMeal);
+              } else {
+                addFavorite(user.id, meal);
+              }
+            }}
             className={`btn btn-sm ${isSaved ? "btn-warning" : "btn-outline"}`}
           >
             {isSaved ? "★ เพิ่มรายการโปรดแล้ว" : "☆ เพิ่มรายการโปรด"}
@@ -105,10 +124,7 @@ export const MealDetailPage: React.FC = () => {
 
         <div className="alert shadow-sm flex justify-end items-center">
           <button
-            onClick={() => {
-              setShoppingListMealId(meal.idMeal);
-              navigate("/shopping-list");
-            }}
+            onClick={handleAddShopping}
             className="btn btn-sm btn-primary">
             เพิ่มในshopping list
           </button>

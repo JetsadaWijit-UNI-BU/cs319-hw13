@@ -4,6 +4,8 @@ import { MealDetailPage } from './pages/MealDetailPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 import { ShoppingListPage } from './pages/ShoppingListPage';
 import { AboutPage } from './pages/AboutPage';
+import { LoginPage } from './pages/LoginPage';
+import { AuthHeader } from './components/AuthHeader';
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +31,7 @@ export const router = createBrowserRouter([
                 เกี่ยวกับ
               </NavLink>
             </nav>
+            <AuthHeader />
           </header>
 
           <main className="container mx-auto px-4 py-6">
@@ -47,6 +50,7 @@ export const router = createBrowserRouter([
       { path: 'favorites', element: <FavoritesPage /> },
       { path: 'shopping-list', element: <ShoppingListPage /> },
       { path: 'about', element: <AboutPage /> },
+      { path: 'login', element: <LoginPage /> },
     ],
   },
 ]);

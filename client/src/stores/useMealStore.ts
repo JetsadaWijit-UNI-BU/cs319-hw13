@@ -1,30 +1,105 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { api } from '../lib/api';
+
+export interface Meal {
+  idMeal: string;
+  strMeal: string;
+  strCategory?: string;
+  strArea?: string;
+  strInstructions?: string;
+  strMealThumb: string;
+  strYoutube?: string;
+}
+
+export interface ShoppingItem extends Meal {
+  itemId: string;
+  checked: boolean;
+}
 
 interface MealState {
-  favorites: string[];
-  toggleFavorite: (id: string) => void;
-  shoppingListMealId: string | null;
-  setShoppingListMealId: (id: string | null) => void;
+  user: { id: string; email: string; name?: string | null } | null;
+  favorites: Meal[];
+  shoppingList: ShoppingItem[];
+
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+
+  loadFavorites: (userId: string) => Promise<void>;
+  addFavorite: (userId: string, meal: Meal) => Promise<void>;
+  removeFavorite: (userId: string, mealId: string) => Promise<void>;
+
+  loadShoppingList: (userId: string) => Promise<void>;
+  addShoppingItem: (userId: string, meal: Meal) => Promise<void>;
+  toggleShoppingItem: (userId: string, itemId: string, checked: boolean) => Promise<void>;
+  removeShoppingItem: (userId: string, itemId: string) => Promise<void>;
+
+  isFavorite: (mealId: string) => boolean;
 }
 
 export const useMealStore = create<MealState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
+      user: null,
       favorites: [],
-      shoppingListMealId: null,
+      shoppingList: [],
 
-      toggleFavorite: (id) =>
+      login: async (email, password) => {
+        const data = await api.login({ email, password });
+        set({ user: data.data });
+      },
+
+      logout: () => set({ user: null, favorites: [], shoppingList: [] }),
+
+      loadFavorites: async (userId) => {
+        const data = await api.getFavorites(userId);
+        set({ favorites: data.data.meals });
+      },
+
+      addFavorite: async (userId, meal) => {
+        await api.addFavorite(userId, meal.idMeal);
         set((state) => ({
-          favorites: state.favorites.includes(id)
-            ? state.favorites.filter((fId) => fId !== id)
-            : [...state.favorites, id],
-        })),
+          favorites: state.favorites.find((f) => f.idMeal === meal.idMeal)
+            ? state.favorites
+            : [...state.favorites, meal],
+        }));
+      },
 
-      setShoppingListMealId: (id) => set({ shoppingListMealId: id }),
+      removeFavorite: async (userId, mealId) => {
+        await api.removeFavorite(userId, mealId);
+        set((state) => ({ favorites: state.favorites.filter((f) => f.idMeal !== mealId) }));
+      },
+
+      loadShoppingList: async (userId) => {
+        const data = await api.getShoppingList(userId);
+        set({ shoppingList: data.data.meals });
+      },
+
+      addShoppingItem: async (userId, meal) => {
+        const data = await api.addShoppingItem(userId, meal.idMeal);
+        set((state) => ({
+          shoppingList: state.shoppingList.find((s) => s.idMeal === meal.idMeal)
+            ? state.shoppingList
+            : [...state.shoppingList, { ...meal, itemId: data.data.itemId, checked: data.data.checked }],
+        }));
+      },
+
+      toggleShoppingItem: async (userId, itemId, checked) => {
+        await api.toggleShoppingItem(userId, itemId, checked);
+        set((state) => ({
+          shoppingList: state.shoppingList.map((s) =>
+            s.itemId === itemId ? { ...s, checked } : s
+          ),
+        }));
+      },
+
+      removeShoppingItem: async (userId, itemId) => {
+        await api.removeShoppingItem(userId, itemId);
+        set((state) => ({ shoppingList: state.shoppingList.filter((s) => s.itemId !== itemId) }));
+      },
+
+      isFavorite: (mealId) => get().favorites.some((f) => f.idMeal === mealId),
     }),
-    {
-      name: 'meal-storage',
-    }
+    { name: 'meal-storage' }
   )
 );
