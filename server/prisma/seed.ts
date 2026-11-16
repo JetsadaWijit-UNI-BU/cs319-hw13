@@ -1,7 +1,12 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { createRequire } from "module";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+
+// @prisma/client is a CJS module; use createRequire so the named import
+// works in ESM on all Node versions / platforms.
+const require = createRequire(import.meta.url);
+const { PrismaClient } = require("@prisma/client");
 
 // Reuse the same single-instance client wiring as the app (adapter-pg over pg Pool)
 const pool = new Pool({
