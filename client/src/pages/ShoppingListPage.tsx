@@ -9,8 +9,16 @@ export const ShoppingListPage: React.FC = () => {
     type: null,
   });
 
+  const loginExample = () => login('owen@example.com', 'password123');
+
+  // Load shopping list whenever the user changes (always call hooks unconditionally)
+  React.useEffect(() => {
+    if (user) {
+      loadShoppingList(user.id);
+    }
+  }, [user, loadShoppingList]);
+
   if (!user) {
-    const loginExample = () => login('owen@example.com', 'password123');
     return (
       <div className="max-w-md mx-auto my-12 text-center card bg-base-100 p-8 shadow-md border border-base-300 space-y-4">
         <h2 className="text-xl font-bold">รายการซื้อวัตถุดิบ</h2>
@@ -22,10 +30,6 @@ export const ShoppingListPage: React.FC = () => {
       </div>
     );
   }
-
-  React.useEffect(() => {
-    loadShoppingList(user.id);
-  }, [user.id, loadShoppingList]);
 
   if (shoppingList.length === 0) {
     return (
