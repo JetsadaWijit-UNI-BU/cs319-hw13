@@ -16,7 +16,10 @@ export const favoriteStore = {
     ]),
 
   findFirst: (userId: string, mealId: string) =>
-    prisma.favorite.findFirst({ where: { userId, mealId } }),
+    prisma.favorite.findFirst({
+      where: { userId, mealId },
+      include: { meal: { include: { ingredients: true } } },
+    }),
 
   create: (userId: string, mealId: string) =>
     prisma.favorite.create({

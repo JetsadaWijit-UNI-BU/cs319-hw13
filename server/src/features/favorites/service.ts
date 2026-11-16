@@ -11,6 +11,8 @@ export const favoriteService = {
   addFavorite: async (userId: string, mealId: string, port: number) => {
     const [user, meal] = await favoriteStore.findUserAndMeal(userId, mealId);
     if (!user || !meal) return null;
+    const existing = await favoriteStore.findFirst(userId, mealId);
+    if (existing) return toMealResponse(port, existing.meal as any);
     const fav = await favoriteStore.create(userId, mealId);
     return toMealResponse(port, fav.meal as any);
   },
