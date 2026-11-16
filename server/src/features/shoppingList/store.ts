@@ -18,6 +18,12 @@ export const shoppingListStore = {
   findUnique: (id: string) =>
     prisma.shoppingListItem.findUnique({ where: { id } }),
 
+  findFirst: (userId: string, mealId: string) =>
+    prisma.shoppingListItem.findFirst({
+      where: { userId, mealId },
+      include: { meal: { include: { ingredients: true } } },
+    }),
+
   create: (userId: string, mealId: string) =>
     prisma.shoppingListItem.create({
       data: { userId, mealId },

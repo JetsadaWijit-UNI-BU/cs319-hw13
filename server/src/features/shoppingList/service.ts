@@ -9,6 +9,8 @@ export const shoppingListService = {
   addItem: async (userId: string, mealId: string) => {
     const [user, meal] = await shoppingListStore.findUserAndMeal(userId, mealId);
     if (!user || !meal) return null;
+    const existing = await shoppingListStore.findFirst(userId, mealId);
+    if (existing) return existing;
     return shoppingListStore.create(userId, mealId);
   },
 
