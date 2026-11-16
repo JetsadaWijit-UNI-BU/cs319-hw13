@@ -2,12 +2,18 @@ import express, { type Request, type Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { z } from "zod";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import { prisma } from "./lib/prisma.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Serve meal images stored at the repo root (images/<file>) under /images.
+const __dirname = dirname(fileURLToPath(import.meta.url));
+app.use("/images", express.static(join(__dirname, "..", "images")));
 
 app.use(cors());
 app.use(express.json());
@@ -49,6 +55,18 @@ type DbMeal = {
   ingredients: Array<{ name: string; measure: string | null }>;
 };
 
+// Convert a relative thumbnail path (images/<file>) into an absolute
+// URL the browser can fetch from this server.
+// One responsibility: build the full image URL.
+function toImageUrl(thumbnail: string): string {
+  if (thumbnail.startsWith("http://") || thumbnail.startsWith("https://")) {
+    return thumbnail;
+  }
+  // thumbnails are stored as images/<file> and served at /images/<file>,
+  // so prepend the host directly (the path already includes "images/").
+  return `http://localhost:${PORT}/${thumbnail}`;
+}
+
 function toMealResponse(m: DbMeal) {
   const ing = m.ingredients.map((i, idx) => ({
     [`strIngredient${idx + 1}`]: i.name,
@@ -60,7 +78,7 @@ function toMealResponse(m: DbMeal) {
     strCategory: m.category ?? "",
     strArea: m.area ?? "",
     strInstructions: m.instructions,
-    strMealThumb: m.thumbnail,
+    strMealThumb: toImageUrl(m.thumbnail),
     strYoutube: m.youtube ?? "",
     ...Object.assign({}, ...ing),
   };
