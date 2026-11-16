@@ -30,6 +30,7 @@ type JsonMeal = {
   strCountry: string | null;
   strMealThumb: string;
   strYoutube: string | null;
+  strInstructions: string;
   ingredients: JsonIngredient[];
 };
 
@@ -54,7 +55,7 @@ function toMealCreateInput(meal: JsonMeal) {
       title: meal.strMeal,
       category: meal.strCategory ?? null,
       area: meal.strCountry ?? null,
-      instructions: "",
+      instructions: meal.strInstructions,
       thumbnail: meal.strMealThumb,
       youtube: meal.strYoutube ?? null,
       ingredients: {
