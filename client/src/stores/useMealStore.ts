@@ -46,7 +46,11 @@ export const useMealStore = create<MealState>()(
 
       login: async (email, password) => {
         const data = await api.login({ email, password });
-        set({ user: data.data });
+        const user = data.data ?? data;
+        if (!user || (!user.id && !user.userId)) {
+          throw new Error('เข้าสู่ระบบไม่สำเร็จ: เซิร์ฟเวอร์ไม่ส่งรหัสผู้ใช้กลับมา');
+        }
+        set({ user });
       },
 
       logout: () => set({ user: null, favorites: [], shoppingList: [] }),
