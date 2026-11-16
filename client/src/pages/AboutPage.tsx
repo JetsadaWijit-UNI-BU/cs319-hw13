@@ -49,8 +49,8 @@ export const AboutPage: React.FC = () => {
           </p>
           <p className="text-sm text-left">
             <b> Gusto (Recipe Hub) </b>จึงเกิดขึ้นจากแนวคิดเรียบง่าย
-            เราดึงข้อมูลสูตรอาหารจาก TheMealDB API มาจัดรูปแบบการแสดงผลใหม่ให้
-            สั้น กระชับ ดูง่าย
+            รวบรวมสูตรอาหารในระบบฐานข้อมูลของเราเอง (Backend + Prisma ORM +
+            PostgreSQL) มาจัดรูปแบบการแสดงผลใหม่ให้สั้น กระชับ ดูง่าย
             เห็นทั้งส่วนผสมและวิธีทำได้ทันทีโดยไม่ต้องเลื่อนหาให้เหนื่อย
             และถ้าเจอสูตรที่ถูกใจ ก็กดเซฟเก็บไว้ใน My Collection
             เพื่อกลับมาดูทีหลังได้ทุกเมื่อ
@@ -86,14 +86,8 @@ export const AboutPage: React.FC = () => {
             <div>
               <h2 className="font-bold">API Link</h2>
               <p className="text-sm">
-                <a
-                  href="https://www.themealdb.com/api.php"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="link link-primary"
-                >
-                  TheMealDB API
-                </a>
+                Backend RESTful API (Prisma + PostgreSQL) running locally at
+                <code className="font-mono text-xs bg-base-200 px-2">http://localhost:3000/api</code>
               </p>
             </div>
           </div>
