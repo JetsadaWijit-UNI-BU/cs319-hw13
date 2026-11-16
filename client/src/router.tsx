@@ -5,7 +5,7 @@ import { FavoritesPage } from './pages/FavoritesPage';
 import { ShoppingListPage } from './pages/ShoppingListPage';
 import { AboutPage } from './pages/AboutPage';
 import { LoginPage } from './pages/LoginPage';
-import { useMealStore } from './stores/useMealStore';
+import { AuthHeader } from './components/AuthHeader';
 
 export const router = createBrowserRouter([
   {
@@ -54,15 +54,3 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
-
-function AuthHeader() {
-  const { user, logout } = useMealStore();
-  return user ? (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-base-content/70">สวัสดี, {user.name}</span>
-      <button onClick={logout} className="btn btn-xs btn-ghost">ออกจากระบบ</button>
-    </div>
-  ) : (
-    <Link to="/login" className="btn btn-xs btn-primary">เข้าสู่ระบบ</Link>
-  );
-}
