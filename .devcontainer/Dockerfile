@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:26-alpine
 
 # Install essential packages for development and DevContainer usage
 RUN apk add --no-cache git bash curl sudo
