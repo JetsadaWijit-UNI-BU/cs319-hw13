@@ -3,7 +3,7 @@ import { shoppingListHandlers } from "./handler.js";
 
 // Shopping list route wiring: maps /api/users/:userId/shopping-list paths to handlers.
 export function createShoppingListRouter(port: number) {
-  const router = Router();
+  const router = Router({ mergeParams: true });
 
   router.get("/", (req, res) => shoppingListHandlers.getItems(req, res, port));
   router.post("/", (req, res) => shoppingListHandlers.addItem(req, res, port));

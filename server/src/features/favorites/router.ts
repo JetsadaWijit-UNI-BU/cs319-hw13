@@ -3,7 +3,7 @@ import { favoriteHandlers } from "./handler.js";
 
 // Favorite route wiring: maps /api/users/:userId/favorites paths to handlers.
 export function createFavoritesRouter(port: number) {
-  const router = Router();
+  const router = Router({ mergeParams: true });
 
   router.get("/", (req, res) => favoriteHandlers.getFavorites(req, res, port));
   router.post("/", (req, res) => favoriteHandlers.addFavorite(req, res, port));
