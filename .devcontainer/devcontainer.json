@@ -12,7 +12,11 @@
         "anthropic.claude-code",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "prisma.prisma"
+        "prisma.prisma",
+        "pkief.material-icon-theme",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "ms-vscode.vscode-typescript-next"
       ]
     }
   },
