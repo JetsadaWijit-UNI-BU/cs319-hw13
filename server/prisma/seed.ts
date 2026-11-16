@@ -1,10 +1,11 @@
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
 // Reuse the same single-instance client wiring as the app (adapter-pg over pg Pool)
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || "postgresql://127.0.0.1:5432/postgres",
+  connectionString: process.env.DIRECT_URL || process.env.DATABASE_URL || "postgresql://127.0.0.1:5432/postgres",
 });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
