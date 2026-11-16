@@ -1,28 +1,29 @@
 import { type Request, type Response } from "express";
 import { z } from "zod";
 import { shoppingListService } from "./service.js";
-import { toMealResponse } from "../meals/transform.js";
 import { idSchema } from "../../lib/schemas.js";
 
 // Shopping list HTTP handlers: request → service → response.
 export const shoppingListHandlers = {
-  getItems: async (req: Request, res: Response, port: number) => {
+  getItems: async (req: Request, res: Response) => {
     const userId = String(req.params.userId);
     const items = await shoppingListService.getItems(userId);
     res.json({
       success: true,
       count: items.length,
       data: {
-        meals: items.map((i) => ({
-          ...toMealResponse(port, i.meal as any),
-          itemId: i.id,
-          checked: i.checked,
+        ingredients: items.map((item) => ({
+          itemId: item.id,
+          mealId: item.mealId,
+          ingredientName: item.ingredientName,
+          measure: item.measure ?? "",
+          checked: item.checked,
         })),
       },
     });
   },
 
-  addItem: async (req: Request, res: Response, port: number) => {
+  addItem: async (req: Request, res: Response) => {
     const userId = String(req.params.userId);
     const parsed = idSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -30,15 +31,23 @@ export const shoppingListHandlers = {
       return;
     }
     const { mealId } = parsed.data;
-    const item = await shoppingListService.addItem(userId, mealId);
-    if (!item) {
+    const items = await shoppingListService.addItem(userId, mealId);
+    if (!items) {
       res.status(404).json({ success: false, message: "ไม่พบผู้ใช้หรือเมนูอาหาร" });
       return;
     }
     res.status(201).json({
       success: true,
       message: "เพิ่มในรายการซื้อของเรียบร้อย",
-      data: { ...toMealResponse(port, item.meal as any), itemId: item.id, checked: item.checked },
+      data: {
+        ingredients: items.map((item) => ({
+          itemId: item.id,
+          mealId: item.mealId,
+          ingredientName: item.ingredientName,
+          measure: item.measure ?? "",
+          checked: item.checked,
+        })),
+      },
     });
   },
 

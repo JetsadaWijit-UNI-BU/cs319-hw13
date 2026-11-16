@@ -12,8 +12,11 @@ export interface Meal {
   strYoutube?: string;
 }
 
-export interface ShoppingItem extends Meal {
+export interface ShoppingItem {
   itemId: string;
+  mealId: string;
+  ingredientName: string;
+  measure: string;
   checked: boolean;
 }
 
@@ -30,9 +33,10 @@ interface MealState {
   removeFavorite: (userId: string, mealId: string) => Promise<void>;
 
   loadShoppingList: (userId: string) => Promise<void>;
-  addShoppingItem: (userId: string, meal: Meal) => Promise<void>;
+  addShoppingItem: (userId: string, mealId: string) => Promise<void>;
   toggleShoppingItem: (userId: string, itemId: string, checked: boolean) => Promise<void>;
   removeShoppingItem: (userId: string, itemId: string) => Promise<void>;
+  clearShoppingList: (userId: string) => Promise<void>;
 
   isFavorite: (mealId: string) => boolean;
 }
@@ -76,15 +80,19 @@ export const useMealStore = create<MealState>()(
 
       loadShoppingList: async (userId) => {
         const data = await api.getShoppingList(userId);
-        set({ shoppingList: data.data.meals });
+        set({ shoppingList: data.data.ingredients });
       },
 
-      addShoppingItem: async (userId, meal) => {
-        const data = await api.addShoppingItem(userId, meal.idMeal);
+      addShoppingItem: async (userId: string, mealId: string) => {
+        const data = await api.addShoppingItem(userId, mealId);
+        const incoming: ShoppingItem[] = data.data.ingredients ?? [];
         set((state) => ({
-          shoppingList: state.shoppingList.find((s) => s.idMeal === meal.idMeal)
-            ? state.shoppingList
-            : [...state.shoppingList, { ...meal, itemId: data.data.itemId, checked: data.data.checked }],
+          shoppingList: [
+            ...state.shoppingList,
+            ...incoming.filter(
+              (item) => !state.shoppingList.some((saved) => saved.itemId === item.itemId),
+            ),
+          ],
         }));
       },
 
@@ -102,7 +110,7 @@ export const useMealStore = create<MealState>()(
         set((state) => ({ shoppingList: state.shoppingList.filter((s) => s.itemId !== itemId) }));
       },
 
-      clearShoppingList: async (userId) => {
+      clearShoppingList: async (userId: string) => {
         await api.clearShoppingList(userId);
         set({ shoppingList: [] });
       },

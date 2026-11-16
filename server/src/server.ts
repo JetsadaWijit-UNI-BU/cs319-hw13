@@ -25,7 +25,7 @@ app.use(express.json());
 app.use("/api/meals", createMealsRouter(PORT));
 app.use("/api/auth", createAuthRouter());
 app.use("/api/users/:userId/favorites", createFavoritesRouter(PORT));
-app.use("/api/users/:userId/shopping-list", createShoppingListRouter(PORT));
+app.use("/api/users/:userId/shopping-list", createShoppingListRouter());
 app.use("/api/users", createUsersRouter());
 
 // เริ่มทำงาน Server

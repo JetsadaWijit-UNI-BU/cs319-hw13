@@ -62,7 +62,7 @@ export const MealDetailPage: React.FC = () => {
       alert('กรุณาเข้าสู่ระบบก่อนเพิ่มในรายการซื้อของ');
       return;
     }
-    await addShoppingItem(user.id, meal);
+    await addShoppingItem(user.id, meal.idMeal);
     navigate("/shopping-list");
   };
 

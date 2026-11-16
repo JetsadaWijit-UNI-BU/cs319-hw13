@@ -71,7 +71,7 @@ export const ShoppingListPage: React.FC = () => {
         <div className="border border-base-200 rounded-lg p-5 space-y-3">
           <div className="border-b border-base-200 pb-2">
             <span className="text-xs text-base-content/50">รายการซื้อวัตถุดิบ</span>
-            <h1 className="font-bold text-base">{shoppingList[0]?.strMeal || 'รายการซื้อของ'}</h1>
+            <h1 className="font-bold text-base">{shoppingList.length} รายการ</h1>
           </div>
 
           <div className="space-y-1.5">
@@ -88,7 +88,7 @@ export const ShoppingListPage: React.FC = () => {
                     onChange={() => toggleCheck(item.itemId, item.checked)}
                   />
                   <span className={item.checked ? 'line-through text-base-content/40' : ''}>
-                    {item.strMeal}
+                    {item.ingredientName}{item.measure ? ` (${item.measure})` : ''}
                   </span>
                 </div>
               </label>
