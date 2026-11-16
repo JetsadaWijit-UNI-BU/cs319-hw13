@@ -25,6 +25,7 @@ export function toMealResponse(port: number, m: DbMeal) {
     strInstructions: m.instructions,
     strMealThumb: toImageUrl(port, m.thumbnail),
     strYoutube: m.youtube ?? "",
+    ingredients: m.ingredients.map((i) => ({ ...i, ingredient: i.name })),
     ...Object.assign({}, ...ing),
   };
 }
