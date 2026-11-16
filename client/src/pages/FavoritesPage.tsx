@@ -5,6 +5,13 @@ import { useMealStore } from '../stores/useMealStore';
 export const FavoritesPage: React.FC = () => {
   const { user, favorites, login, loadFavorites, removeFavorite } = useMealStore();
 
+  // Load favorites whenever the user changes (hooks always run unconditionally)
+  React.useEffect(() => {
+    if (user) {
+      loadFavorites(user.id);
+    }
+  }, [user, loadFavorites]);
+
   if (!user) {
     return (
       <div className="max-w-md mx-auto my-12 text-center card bg-base-100 p-8 shadow-md border border-base-300 space-y-4">
@@ -16,10 +23,6 @@ export const FavoritesPage: React.FC = () => {
       </div>
     );
   }
-
-  React.useEffect(() => {
-    loadFavorites(user.id);
-  }, [user.id, loadFavorites]);
 
   if (favorites.length === 0) {
     return (
