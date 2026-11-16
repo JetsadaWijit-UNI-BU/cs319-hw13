@@ -35,4 +35,7 @@ export const shoppingListStore = {
 
   delete: (id: string) =>
     prisma.shoppingListItem.delete({ where: { id } }),
+
+  clearByUser: (userId: string) =>
+    prisma.shoppingListItem.deleteMany({ where: { userId } }),
 };

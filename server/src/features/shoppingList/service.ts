@@ -26,4 +26,9 @@ export const shoppingListService = {
     await shoppingListStore.delete(itemId);
     return true;
   },
+
+  clearItems: async (userId: string) => {
+    const result = await shoppingListStore.clearByUser(userId);
+    return result.count > 0;
+  },
 };

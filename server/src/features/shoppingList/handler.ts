@@ -66,4 +66,10 @@ export const shoppingListHandlers = {
     }
     res.json({ success: true, message: "ลบรายการซื้อของเรียบร้อย" });
   },
+
+  clearItems: async (req: Request, res: Response) => {
+    const userId = String(req.params.userId);
+    await shoppingListService.clearItems(userId);
+    res.json({ success: true, message: "ล้างรายการซื้อของเรียบร้อย" });
+  },
 };
