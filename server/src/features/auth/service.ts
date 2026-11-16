@@ -5,6 +5,6 @@ export const authService = {
   login: async (email: string, password: string) => {
     const user = await authStore.findUserByEmail(email);
     if (!user || user.password !== password) return null;
-    return { id: user.id, email: user.email, name: user.name };
+    return { id: user.id, userId: user.id, email: user.email, name: user.name };
   },
 };
