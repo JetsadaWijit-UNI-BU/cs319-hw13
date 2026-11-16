@@ -11,10 +11,11 @@
       "extensions": [
         "anthropic.claude-code",
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "prisma.prisma"
       ]
     }
   },
   "remoteUser": "node",
-  "postCreateCommand": "npm install"
+  "postCreateCommand": "cd client && npm install && cd ../server && npm install"
 }
