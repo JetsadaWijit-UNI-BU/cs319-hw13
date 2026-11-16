@@ -1,10 +1,8 @@
-FROM node:26-alpine
+# Use the official Microsoft devcontainer image for Node.js 26
+FROM mcr.microsoft.com/devcontainers/javascript-node:26
 
-# Install essential packages for development and DevContainer usage
-RUN apk add --no-cache git bash curl sudo
-
-# Set default user to 'node' which is included in the base image
-USER node
+# The base image already includes essential dev tools (git, bash, curl, sudo) 
+# and sets up the 'node' user with proper permissions.
 
 # Set the default working directory
 WORKDIR /workspace
