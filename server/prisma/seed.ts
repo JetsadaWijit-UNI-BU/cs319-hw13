@@ -1,5 +1,8 @@
 import "dotenv/config";
 import { createRequire } from "module";
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
@@ -15,17 +18,66 @@ const pool = new Pool({
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-async function main() {
-  console.log("🌱 Seeding database...");
+type JsonIngredient = {
+  ingredient: string;
+  measure: string;
+};
 
-  // Clear existing data (respect FK order)
+type JsonMeal = {
+  idMeal: string;
+  strMeal: string;
+  strCategory: string | null;
+  strCountry: string | null;
+  strMealThumb: string;
+  strYoutube: string | null;
+  ingredients: JsonIngredient[];
+};
+
+type RawMeals = { meals: JsonMeal[] };
+
+// Resolve meals.json next to this seed file so the seed works regardless of CWD.
+const seedDir = dirname(fileURLToPath(import.meta.url));
+const mealsJsonPath = join(seedDir, "meals.json");
+
+// Load meal data from the local JSON file. One responsibility: read + parse.
+function loadMealsFromJson(filePath: string): JsonMeal[] {
+  const raw = readFileSync(filePath, "utf8");
+  const parsed: RawMeals = JSON.parse(raw);
+  return parsed.meals;
+}
+
+// Map a JSON meal record to a Prisma meal create input.
+// One responsibility: transform JSON shape into the Prisma input shape.
+function toMealCreateInput(meal: JsonMeal) {
+  return {
+    data: {
+      title: meal.strMeal,
+      category: meal.strCategory ?? null,
+      area: meal.strCountry ?? null,
+      instructions: "",
+      thumbnail: meal.strMealThumb,
+      youtube: meal.strYoutube ?? null,
+      ingredients: {
+        create: meal.ingredients.map((i) => ({
+          name: i.ingredient,
+          measure: i.measure ?? null,
+        })),
+      },
+    },
+  };
+}
+
+// Clear existing data in FK-safe order. One responsibility: wipe tables.
+async function clearDatabase() {
   await prisma.ingredient.deleteMany();
   await prisma.favorite.deleteMany();
   await prisma.shoppingListItem.deleteMany();
   await prisma.meal.deleteMany();
   await prisma.user.deleteMany();
+}
 
-  // ---- Users (simple auth: email + unencrypted password, allowed for this homework) ----
+// Create the seed users. One responsibility: insert users.
+async function createUsers() {
   const user1 = await prisma.user.create({
     data: {
       email: "owen@example.com",
@@ -40,147 +92,37 @@ async function main() {
       name: "ศรดิษฐ์ เขียวป้อ",
     },
   });
+  return [user1, user2] as const;
+}
 
-  // ---- Meals with ingredients (custom data, not from an external API) ----
-  const tomYum = await prisma.meal.create({
-    data: {
-      title: "Tom Yum Goong",
-      category: "Soup",
-      area: "Thai",
-      instructions:
-        "Bring water to a boil with lemongrass, galangal, and kaffir lime leaves. Add shrimp and mushrooms, then season with fish sauce, lime juice, and chili paste. Serve hot.",
-      thumbnail:
-        "https://images.unsplash.com/photo-1563638366-e4d338b7f16f?auto=format&fit=crop&w=600&q=80",
-      youtube: "https://www.youtube.com/watch?v=Uk7h5qP8k8k",
-      ingredients: {
-        create: [
-          { name: "Shrimp", measure: "300 g" },
-          { name: "Straw mushroom", measure: "100 g" },
-          { name: "Lemongrass", measure: "2 stalks" },
-          { name: "Galangal", measure: "4 slices" },
-          { name: "Kaffir lime leaves", measure: "4 leaves" },
-          { name: "Fish sauce", measure: "2 tbsp" },
-          { name: "Lime juice", measure: "2 tbsp" },
-          { name: "Chili paste", measure: "1 tbsp" },
-        ],
-      },
-    },
-    include: { ingredients: true },
-  });
+// Seed every meal from the JSON data, each with its ingredients.
+// One responsibility: insert all meals.
+async function seedMeals(meals: JsonMeal[]) {
+  const created: Array<Awaited<ReturnType<typeof prisma.meal.create>>> = [];
+  for (const meal of meals) {
+    created.push(await prisma.meal.create(toMealCreateInput(meal)));
+  }
+  return created;
+}
 
-  const padThai = await prisma.meal.create({
-    data: {
-      title: "Pad Thai",
-      category: "Stir-fry",
-      area: "Thai",
-      instructions:
-        "Soak rice noodles until soft. Stir-fry with tofu, shrimp, and egg. Add tamarind sauce, fish sauce, sugar, and chili. Garnish with peanuts, bean sprouts, and lime.",
-      thumbnail:
-        "https://images.unsplash.com/photo-1559336353-1ee66a7e258a?auto=format&fit=crop&w=600&q=80",
-      youtube: "https://www.youtube.com/watch?v=lMwX0-7q2vI",
-      ingredients: {
-        create: [
-          { name: "Rice noodles", measure: "200 g" },
-          { name: "Tofu", measure: "1 block" },
-          { name: "Shrimp", measure: "150 g" },
-          { name: "Egg", measure: "2 pcs" },
-          { name: "Tamarind sauce", measure: "3 tbsp" },
-          { name: "Fish sauce", measure: "1 tbsp" },
-          { name: "Sugar", measure: "1 tsp" },
-          { name: "Chili flakes", measure: "1 tsp" },
-          { name: "Crushed peanuts", measure: "2 tbsp" },
-          { name: "Bean sprouts", measure: "1 cup" },
-          { name: "Lime", measure: "1 pc" },
-        ],
-      },
-    },
-    include: { ingredients: true },
-  });
+// Create one sample favorite for user1. One responsibility: insert a favorite.
+async function createSampleFavorite(userId: string, mealId: string) {
+  await prisma.favorite.create({ data: { userId, mealId } });
+}
 
-  const greenCurry = await prisma.meal.create({
-    data: {
-      title: "Green Curry",
-      category: "Curry",
-      area: "Thai",
-      instructions:
-        "Simmer green curry paste in coconut milk until fragrant. Add chicken and eggplant, season with fish sauce and palm sugar. Finish with basil leaves.",
-      thumbnail:
-        "https://images.unsplash.com/photo-1544015517-24d9ba671e7a?auto=format&fit=crop&w=600&q=80",
-      youtube: "https://www.youtube.com/watch?v=VcA_mp1k0cY",
-      ingredients: {
-        create: [
-          { name: "Green curry paste", measure: "2 tbsp" },
-          { name: "Coconut milk", measure: "400 ml" },
-          { name: "Chicken", measure: "250 g" },
-          { name: "Thai eggplant", measure: "6 pcs" },
-          { name: "Bamboo shoots", measure: "50 g" },
-          { name: "Fish sauce", measure: "1 tbsp" },
-          { name: "Palm sugar", measure: "1 tsp" },
-          { name: "Thai basil", measure: "a handful" },
-        ],
-      },
-    },
-    include: { ingredients: true },
-  });
+async function main() {
+  console.log("🌱 Seeding database...");
 
-  const somTum = await prisma.meal.create({
-    data: {
-      title: "Som Tum (Green Papaya Salad)",
-      category: "Salad",
-      area: "Thai",
-      instructions:
-        "Pound garlic, chilies, and palm sugar in a mortar. Add green papaya, tomatoes, and green beans. Season with fish sauce, lime juice, and dried shrimp. Mix well.",
-      thumbnail:
-        "https://images.unsplash.com/photo-1523014641155-f54d6484236c?auto=format&fit=crop&w=600&q=80",
-      youtube: "https://www.youtube.com/watch?v=jlFCg_P_q-E",
-      ingredients: {
-        create: [
-          { name: "Green papaya", measure: "300 g" },
-          { name: "Garlic", measure: "3 cloves" },
-          { name: "Bird's eye chili", measure: "4 pcs" },
-          { name: "Palm sugar", measure: "1 tbsp" },
-          { name: "Cherry tomato", measure: "4 pcs" },
-          { name: "Green beans", measure: "4 pcs" },
-          { name: "Fish sauce", measure: "1 tbsp" },
-          { name: "Lime juice", measure: "2 tbsp" },
-          { name: "Dried shrimp", measure: "1 tbsp" },
-        ],
-      },
-    },
-    include: { ingredients: true },
-  });
+  await clearDatabase();
+  const [user1, user2] = await createUsers();
 
-  const mangoStickyRice = await prisma.meal.create({
-    data: {
-      title: "Mango Sticky Rice",
-      category: "Dessert",
-      area: "Thai",
-      instructions:
-        "Steam glutinous rice until cooked. Mix with coconut milk, sugar, and salt. Serve with fresh ripe mango slices and drizzle with coconut cream.",
-      thumbnail:
-        "https://images.unsplash.com/photo-1588504328869-7e7990cc794c?auto=format&fit=crop&w=600&q=80",
-      youtube: "https://www.youtube.com/watch?v=GbI_K8L2bqY",
-      ingredients: {
-        create: [
-          { name: "Glutinous rice", measure: "200 g" },
-          { name: "Ripe mango", measure: "1 pc" },
-          { name: "Coconut milk", measure: "200 ml" },
-          { name: "Sugar", measure: "2 tbsp" },
-          { name: "Salt", measure: "1/4 tsp" },
-          { name: "Coconut cream", measure: "2 tbsp" },
-        ],
-      },
-    },
-    include: { ingredients: true },
-  });
+  const meals = loadMealsFromJson(mealsJsonPath);
+  const createdMeals = await seedMeals(meals);
+
+  await createSampleFavorite(user1.id, createdMeals[0].id);
 
   console.log("✅ Created users:", user1.email, user2.email);
-  console.log("✅ Created meals:", tomYum.title, padThai.title, greenCurry.title, somTum.title, mangoStickyRice.title);
-
-  // ---- Seed one favorite for user1 ----
-  await prisma.favorite.create({
-    data: { userId: user1.id, mealId: tomYum.id },
-  });
+  console.log(`✅ Created ${createdMeals.length} meals from ${mealsJsonPath}`);
   console.log("✅ Created sample favorite");
 
   console.log("🎉 Seed complete");
