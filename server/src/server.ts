@@ -7,6 +7,7 @@ import { createMealsRouter } from "./features/meals/router.js";
 import { createAuthRouter } from "./features/auth/router.js";
 import { createFavoritesRouter } from "./features/favorites/router.js";
 import { createShoppingListRouter } from "./features/shoppingList/router.js";
+import { createUsersRouter } from "./features/users/router.js";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use("/api/meals", createMealsRouter(PORT));
 app.use("/api/auth", createAuthRouter());
 app.use("/api/users/:userId/favorites", createFavoritesRouter(PORT));
 app.use("/api/users/:userId/shopping-list", createShoppingListRouter(PORT));
+app.use("/api/users", createUsersRouter());
 
 // เริ่มทำงาน Server
 app.listen(PORT, () => {

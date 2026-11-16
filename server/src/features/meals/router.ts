@@ -10,6 +10,8 @@ export function createMealsRouter(port: number) {
   router.post("/", (req, res) => mealHandlers.createMeal(req, res, port));
   router.put("/:id", (req, res) => mealHandlers.updateMeal(req, res, port));
   router.delete("/:id", (req, res) => mealHandlers.deleteMeal(req, res, port));
+  router.get("/categories", (req, res) => mealHandlers.getCategories(req, res));
+  router.get("/areas", (req, res) => mealHandlers.getAreas(req, res));
 
   return router;
 }

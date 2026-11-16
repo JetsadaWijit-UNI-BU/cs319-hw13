@@ -31,4 +31,6 @@ export const api = {
     }),
   removeShoppingItem: (userId: string, itemId: string) =>
     request(`/api/users/${userId}/shopping-list/${itemId}`, { method: "DELETE" }),
+  clearShoppingList: (userId: string) =>
+    request(`/api/users/${userId}/shopping-list`, { method: "DELETE" }),
 };

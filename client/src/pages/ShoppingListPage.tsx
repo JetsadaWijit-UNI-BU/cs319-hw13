@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { useMealStore } from '../stores/useMealStore';
 
 export const ShoppingListPage: React.FC = () => {
-  const { user, shoppingList, loadShoppingList, toggleShoppingItem, login } = useMealStore();
+  const { user, shoppingList, loadShoppingList, toggleShoppingItem, login, clearShoppingList } = useMealStore();
   const [modalState, setModalState] = useState<{ isOpen: boolean; type: 'clear' | 'finish' | 'incomplete' | null }>({
     isOpen: false,
     type: null,
@@ -58,7 +58,10 @@ export const ShoppingListPage: React.FC = () => {
     }
   };
 
-  const handleConfirmAction = () => {
+  const handleConfirmAction = async () => {
+    if (modalState.type === 'clear' && user) {
+      await clearShoppingList(user.id);
+    }
     setModalState({ isOpen: false, type: null });
   };
 

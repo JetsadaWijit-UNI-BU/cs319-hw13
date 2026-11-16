@@ -46,4 +46,10 @@ export const favoriteHandlers = {
     }
     res.json({ success: true, message: "ลบรายการโปรดเรียบร้อย" });
   },
+
+  clearFavorites: async (req: Request, res: Response) => {
+    const userId = String(req.params.userId);
+    await favoriteService.clearFavorites(userId);
+    res.json({ success: true, message: "ล้างรายการโปรดทั้งหมดเรียบร้อย" });
+  },
 };

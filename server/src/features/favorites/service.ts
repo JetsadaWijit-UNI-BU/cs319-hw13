@@ -23,4 +23,9 @@ export const favoriteService = {
     await favoriteStore.delete(fav.id);
     return true;
   },
+
+  clearFavorites: async (userId: string) => {
+    const result = await favoriteStore.clearByUser(userId);
+    return result.count > 0;
+  },
 };

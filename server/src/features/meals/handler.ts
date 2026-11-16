@@ -68,4 +68,14 @@ export const mealHandlers = {
     }
     res.json({ success: true, message: `ลบเมนูอาหาร '${title}' สำเร็จ` });
   },
+
+  getCategories: async (req: Request, res: Response) => {
+    const categories = await mealService.getCategories();
+    res.json({ success: true, data: { categories } });
+  },
+
+  getAreas: async (req: Request, res: Response) => {
+    const areas = await mealService.getAreas();
+    res.json({ success: true, data: { areas } });
+  },
 };

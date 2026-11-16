@@ -19,4 +19,18 @@ export const mealStore = {
 
   deleteIngredients: (mealId: string) =>
     prisma.ingredient.deleteMany({ where: { mealId } }),
+
+  distinctCategories: () =>
+    prisma.meal.findMany({
+      distinct: ["category"],
+      select: { category: true },
+      where: { category: { not: null } },
+    }),
+
+  distinctAreas: () =>
+    prisma.meal.findMany({
+      distinct: ["area"],
+      select: { area: true },
+      where: { area: { not: null } },
+    }),
 };

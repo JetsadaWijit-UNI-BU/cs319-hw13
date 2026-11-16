@@ -102,6 +102,11 @@ export const useMealStore = create<MealState>()(
         set((state) => ({ shoppingList: state.shoppingList.filter((s) => s.itemId !== itemId) }));
       },
 
+      clearShoppingList: async (userId) => {
+        await api.clearShoppingList(userId);
+        set({ shoppingList: [] });
+      },
+
       isFavorite: (mealId) => get().favorites.some((f) => f.idMeal === mealId),
     }),
     { name: 'meal-storage' }

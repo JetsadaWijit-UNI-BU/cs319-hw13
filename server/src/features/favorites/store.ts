@@ -29,4 +29,7 @@ export const favoriteStore = {
 
   delete: (id: string) =>
     prisma.favorite.delete({ where: { id } }),
+
+  clearByUser: (userId: string) =>
+    prisma.favorite.deleteMany({ where: { userId } }),
 };

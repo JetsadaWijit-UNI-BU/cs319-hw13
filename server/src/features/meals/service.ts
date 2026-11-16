@@ -73,4 +73,14 @@ export const mealService = {
     await mealStore.delete(id);
     return existing.title;
   },
+
+  getCategories: async () => {
+    const rows = await mealStore.distinctCategories();
+    return rows.map((r) => r.category).filter(Boolean);
+  },
+
+  getAreas: async () => {
+    const rows = await mealStore.distinctAreas();
+    return rows.map((r) => r.area).filter(Boolean);
+  },
 };
