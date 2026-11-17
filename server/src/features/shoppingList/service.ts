@@ -9,9 +9,18 @@ export const shoppingListService = {
   addItem: async (userId: string, mealId: string) => {
     const [user, meal] = await shoppingListStore.findUserAndMeal(userId, mealId);
     if (!user || !meal) return null;
-    const alreadyAdded = await shoppingListStore.findFirstByUserAndMeal(userId, mealId);
-    if (!alreadyAdded) {
-      await shoppingListStore.createMany(userId, mealId, meal.ingredients);
+    const existing = await shoppingListStore.findManyByUserAndMeal(userId, mealId);
+    const existingNames = new Set(existing.map((item) => item.ingredientName));
+    const seenNames = new Set<string>();
+    const newIngredients = meal.ingredients.filter((ingredient) => {
+      if (existingNames.has(ingredient.name) || seenNames.has(ingredient.name)) {
+        return false;
+      }
+      seenNames.add(ingredient.name);
+      return true;
+    });
+    if (newIngredients.length > 0) {
+      await shoppingListStore.createMany(userId, mealId, newIngredients);
     }
     return shoppingListStore.findManyByUserAndMeal(userId, mealId);
   },
