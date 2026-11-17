@@ -1,4 +1,6 @@
 import React from "react";
+import soraditImg from "../img/soradit.jpg";
+import warisImg from "../img/waris.jpg";
 
 const techStack = [
   "React 19",
@@ -16,14 +18,14 @@ const members = [
     nickname: "โอ๊ค",
     id: "1660701366",
     role: "Frontend & UI Layout",
-    img: "https://github.com/Soradit/img/blob/main/soradit.jpg?raw=true",
+    img: soraditImg,
   },
   {
     name: "วริศ ศรีสุข",
     nickname: "แฮม",
     id: "1660700665",
     role: "About & Shopping List Page",
-    img: "https://scontent.fbkk8-3.fna.fbcdn.net/v/t39.30808-6/288774790_1207091566761634_4363004264825020874_n.jpg?stp=dst-jpg_tt6&cstp=mx811x806&ctp=s811x806&_nc_cat=111&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=Ubxd5xa2t08Q7kNvwFEDi_q&_nc_oc=Adr4F5CgWBFHpxiSeCAnQFG_zAbTMpPQezyJAJub0TIOmFNA2jnD8frwrU5iCjJMklApvAlXCqPXSNmeaVqZUuTj&_nc_zt=23&_nc_ht=scontent.fbkk8-3.fna&_nc_gid=_cL1-4aS-BEbR92zCpgEmA&_nc_ss=7b2a8&oh=00_AQOZ0gUCyCuzBOMtVSL-HgMU81a_0avay5xSMgpUN-kT8Q&oe=6ADAB95D",
+    img: warisImg,
   },
   {
     name: "เจษฎา วิจิตร",
