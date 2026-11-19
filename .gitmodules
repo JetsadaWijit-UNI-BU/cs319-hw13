@@ -1,0 +1,6 @@
+[submodule "client"]
+	path = client
+	url = https://github.com/JetsadaWijit-UNI-BU/cs319-hw13-client.git
+[submodule "server"]
+	path = server
+	url = https://github.com/JetsadaWijit-UNI-BU/cs319-hw13-server.git
